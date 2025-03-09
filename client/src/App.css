@@ -1,0 +1,55 @@
+#root {
+  margin: 0 auto;
+}
+
+body {
+  background-color: #CEC1A8;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.no-margin {
+  margin: 0;
+}
+
+.ta-center {
+    text-align: center;
+}
+
+.ta-start {
+  text-align: start;
+}
+
+.fs-12 {
+  font-size: 12px;
+}
+
+.fw-bold {
+  font-weight: bold;
+}
+
+.error {
+  color: #76000a;
+}
+
+.vanilla {
+  color: #F1EADA;
+}
+
+.bg-mountain {
+    background-color: #AAA396;
+}
+
+.bg-vanilla {
+  background-color: #F1EADA;
+}
+
+.bg-saddle {
+  background-color: #5C5551;
+}
+
+.bg-mustang {
+  background-color: #807D7D;
+}

@@ -1,0 +1,66 @@
+.form {
+    align-self: flex-start;
+    width: 100%;
+    margin: 1.5rem 0 0 0;
+    position: inherit;
+}
+
+.field {
+    width: inherit;
+    margin: 1rem 0;
+}
+
+.input {
+    border-radius: 20px;
+    border-width: 0;
+    width: 96.25%;
+    height: 1.5rem;
+    padding-left: 0.5rem;
+}
+
+.login-btn {
+    width: 100%;
+}
+
+.register-btn {
+    align-self: flex-end;
+}
+
+.button {
+    border-radius: 20px;
+    border-width: 0;
+    padding: 1rem;
+}
+
+.button:hover {
+    cursor: pointer;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+@media screen and (max-width: 992px) {
+    .button {
+        padding: 1rem 0.5rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .buttons {
+        flex-direction: column-reverse;
+    }
+
+    .button {
+        width: 100%;
+    }
+
+    .register-btn {
+        margin-top: 1rem;
+    }
+
+    .login {
+        margin-top: 1rem;
+    }
+}
