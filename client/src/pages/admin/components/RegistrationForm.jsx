@@ -27,6 +27,10 @@ function RegistrationForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (error) {
+            setError("");
+        }
+
         const validationError = register(formData);
 
         if (validationError) {
@@ -36,7 +40,7 @@ function RegistrationForm() {
 
         const requestBody = {
             ...formData,
-            adminCode: code
+            admin_code: code
         };
 
         try {
@@ -48,9 +52,23 @@ function RegistrationForm() {
                 body: JSON.stringify(requestBody),
             });
 
-            if (!response.ok) throw new Error("Error registering user");
-
-            console.log(response);
+            if (response.status === 403) {
+                const errorJson = await response.json();
+                const errorMessage = errorJson.error;
+                setError(errorMessage);
+                return;
+            }
+            else if (response.status === 409) {
+                const errorJson = await response.json();
+                const errorMessage = errorJson.error;
+                setError(errorMessage);
+                return;
+            }
+            else if (!response.ok) {
+                setError("Ha ocurrido un error al registrar usuario");
+                return;
+            }
+            const json = await response.json();
         } catch (err) {
             console.error(err);
         }
