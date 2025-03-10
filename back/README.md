@@ -13,5 +13,5 @@
 <h2>Step 2: Execute the DB initialization script</h2>
 <p>Inside the root of the rust project run: 'cargo run --bin setup_db'</p>
 
-<h3>Step 3: Run the server</h3>
+<h2>Step 3: Run the server</h2>
 <p>Inside the root of the rust project run: 'cargo run'</p>
