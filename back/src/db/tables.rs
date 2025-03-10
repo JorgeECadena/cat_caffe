@@ -22,7 +22,7 @@ pub fn create_cats(conn: &sqlite::Connection) -> sqlite::Result<()> {
 pub fn create_user(conn: &sqlite::Connection) -> sqlite::Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS user(
-            username TEXT NOT NULL,
+            username TEXT NOT NULL UNIQUE,
             password TEXT NOT NULL,
             gender TEXT,
             age INTEGER,
