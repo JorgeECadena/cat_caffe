@@ -1,8 +1,16 @@
-use std::env;
-use std::process;
+use std::{env, process};
 use dotenv::dotenv;
+use argon2::{
+    password_hash::{
+        rand_core::OsRng,
+        PasswordHash, PasswordHasher, SaltString, Error
+    },
+    Argon2
+};
 
 pub mod db;
+pub mod admin;
+pub mod errors;
 
 pub fn bind_config() -> (String, u16) {
     dotenv().ok();
@@ -23,4 +31,14 @@ pub fn bind_config() -> (String, u16) {
         });
 
     (bind_url, port)
+}
+
+pub fn hash(password: &str) -> Result<String, Error> {
+    let salt = SaltString::generate(&mut OsRng);
+
+    let argon2 = Argon2::default();
+
+    let hashed_password = argon2.hash_password(password.as_bytes(), &salt)?;
+
+    Ok(hashed_password.to_string())
 }
