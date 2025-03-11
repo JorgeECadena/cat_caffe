@@ -10,6 +10,7 @@ function RegistrationForm() {
     const [formData, setFormData] = useState({username: "", password: "", confirmation: ""});
     const [code, setCode] = useState("");
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,6 +30,10 @@ function RegistrationForm() {
         e.preventDefault();
         if (error) {
             setError("");
+        }
+
+        if (success) {
+            setSuccess("");
         }
 
         const validationError = register(formData);
@@ -69,8 +74,12 @@ function RegistrationForm() {
                 return;
             }
             const json = await response.json();
+
+            setSuccess(json.message);
+            setFormData({username: "", password: "", confirmation: ""});
+            setCode("");
         } catch (err) {
-            console.error(err);
+            setError("Error al registrar usuario");
         }
     }
 
@@ -78,6 +87,7 @@ function RegistrationForm() {
             <>
                 <form onSubmit={handleSubmit} className="form ta-start">
                     {error && <p className="no-margin ta-center error">{error}</p>}
+                    {success && <p className="no-margin ta-center success">{success}</p>}
                     <div className="field">
                         <p className="no-margin">Nombre de usuario:</p>
                         <input 
