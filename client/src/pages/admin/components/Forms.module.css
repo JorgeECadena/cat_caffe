@@ -18,11 +18,11 @@
     padding-left: 0.5rem;
 }
 
-.login-btn {
+.secondaryBtn {
     width: 100%;
 }
 
-.register-btn {
+.primaryBtn {
     align-self: flex-end;
 }
 
@@ -56,11 +56,11 @@
         width: 100%;
     }
 
-    .register-btn {
+    .primaryBtn {
         margin-top: 1rem;
     }
 
-    .login {
+    .secondaryContainer {
         margin-top: 1rem;
     }
 }
