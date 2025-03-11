@@ -1,12 +1,11 @@
 import RegistrationForm from "./RegistrationForm";
-import "./Register.css";
-import "../../../App.css";
+import styles from "./Generics.module.css";
 
 function AdminRegister() {
     return (
         <>
-            <div className="page-container">
-                <div className="container bg-mountain">
+            <div className={styles.pageContainer}>
+                <div className={`${styles.container} bg-mountain`}>
                     <h1 className="no-margin">Registrar</h1>
                     <RegistrationForm />
                 </div>

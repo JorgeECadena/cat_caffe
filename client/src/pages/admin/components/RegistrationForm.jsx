@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { register } from "../../../utils/validation";
-import "./RegistrationForm.css";
-import "../../../App.css";
+import styles from "./Forms.module.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -85,13 +84,13 @@ function RegistrationForm() {
 
     return (
             <>
-                <form onSubmit={handleSubmit} className="form ta-start">
+                <form onSubmit={handleSubmit} className={`${styles.form} ta-start`}>
                     {error && <p className="no-margin ta-center error">{error}</p>}
                     {success && <p className="no-margin ta-center success">{success}</p>}
-                    <div className="field">
+                    <div className={styles.field}>
                         <p className="no-margin">Nombre de usuario:</p>
                         <input 
-                            className="input bg-vanilla"
+                            className={`${styles.input} bg-vanilla`}
                             type="text" 
                             name="username"
                             placeholder="Nombre de usuario"
@@ -99,10 +98,10 @@ function RegistrationForm() {
                             onChange={handleChange}
                         />
                     </div>
-                    <div className="field">
+                    <div className={styles.field}>
                         <p className="no-margin">Password:</p>
                         <input 
-                            className="input bg-vanilla"
+                            className={`${styles.input} bg-vanilla`}
                             onChange={handleChange}
                             placeholder="Password"
                             value={formData.password}
@@ -110,7 +109,7 @@ function RegistrationForm() {
                             name="password"
                         />
                     </div>
-                    <div className="field">
+                    <div className={styles.field}>
                         <p className="no-margin">Confirmar password:</p>
                         <input 
                             type="password" 
@@ -118,27 +117,27 @@ function RegistrationForm() {
                             onChange={handleChange}
                             placeholder="Confirmar password"
                             value={formData.confirmation}
-                            className="input bg-vanilla" 
+                            className={`${styles.input} bg-vanilla`}
                         />
                     </div>
-                    <div className="field">
+                    <div className={styles.field}>
                         <p className="no-margin">Codigo de administrador:</p>
                         <input 
                             onChange={handleCode}
                             value={code}
                             placeholder="Codigo de administrador"
                             type="password" 
-                            className="input bg-vanilla" 
+                            className={`${styles.input} bg-vanilla`}
                         />
                     </div>
 
-                    <div className="buttons">
-                        <div className="login">
+                    <div className={styles.buttons}>
+                        <div className={styles.secondaryContainer}>
                             <p className="no-margin  fs-12 ta-center">Ya tienes cuenta?</p>
-                            <button type="button" className="button login-btn bg-mustang vanilla fw-bold" onClick={handleLoginRedirect}>Iniciar sesion</button>
+                            <button type="button" className={`${styles.button} ${styles.secondaryBtn} bg-mustang vanilla fw-bold`} onClick={handleLoginRedirect}>Iniciar sesion</button>
                         </div>
 
-                        <button className="button register-btn bg-saddle vanilla fw-bold" type="submit">Registrarse</button>
+                        <button className={`${styles.button} ${styles.primaryBtn} bg-saddle vanilla fw-bold`} type="submit">Registrarse</button>
                     </div>
                 </form>
             </>
