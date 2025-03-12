@@ -2,7 +2,7 @@ use actix_cors::Cors;
 use actix_web::{post, web, http, App, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use serde_json::json;
-use back::{ self, admin, db::{self, queries}, errors::UserCreationError };
+use back::{ self, admin, db::{self, queries}, errors::{UserCreationError, UserLoginError} };
 use std::{ env, process };
 
 #[post("/admin/register")]
@@ -50,6 +50,41 @@ async fn register_admin(req: web::Json<admin::RegisterRequest>) -> impl Responde
     }
 }
 
+#[post("/admin/login")]
+async fn sign_in_admin(req: web::Json<admin::LoginRequest>) -> impl Responder {
+    let user = db::User {
+        username: req.username.clone(),
+        password: req.password.clone(),
+        ..Default::default()
+    };
+
+    match back::check_password(&user) {
+        Ok(_) => {
+            HttpResponse::Ok().json(json!({
+                "message": "Success"
+            }))
+        },
+        Err(UserLoginError::UserDoesNotExist) => {
+            HttpResponse::NotFound().json(json!({
+                "error": "El usuario no existe"
+            }))
+        },
+        Err(UserLoginError::InvalidPassword) => {
+            HttpResponse::Forbidden().json(json!({
+                "error": "Password invalido"
+            }))
+        },
+        Err(UserLoginError::DbError(err)) => {
+            eprintln!("Database error: {err}");
+            process::exit(1);
+        },
+        Err(UserLoginError::UnknownError) => {
+            eprintln!("Unknown error.");
+            process::exit(1);
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -67,6 +102,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .service(register_admin)
+            .service(sign_in_admin)
     })
     .bind(back::bind_config())?
     .run()
