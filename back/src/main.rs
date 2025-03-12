@@ -52,6 +52,7 @@ async fn register_admin(req: web::Json<admin::RegisterRequest>) -> impl Responde
 
 #[post("/admin/login")]
 async fn sign_in_admin(req: web::Json<admin::LoginRequest>) -> impl Responder {
+    eprintln!("Holi");
     let user = db::User {
         username: req.username.clone(),
         password: req.password.clone(),
@@ -91,6 +92,28 @@ async fn sign_in_admin(req: web::Json<admin::LoginRequest>) -> impl Responder {
     }
 }
 
+#[post("/admin/validate")]
+async fn validate_admin_token(req: web::Json<admin::JWT>) -> impl Responder {
+    match auth::validate_jwt(&req.token) {
+        Ok(claims) => {
+            if !claims.is_admin {
+                return HttpResponse::Forbidden().json(json!({
+                    "error": "Usuario no autorizado"
+                }));
+            }
+
+            HttpResponse::Ok().json(json!({
+                "message": "success"
+            }))
+        },
+        Err(_) => {
+            HttpResponse::Forbidden().json(json!({
+                "error": "Token invalido, intenta volver a iniciar sesion"
+            }))
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -100,6 +123,7 @@ async fn main() -> std::io::Result<()> {
             process::exit(1);
         });
         let cors = Cors::default()
+            .allow_any_origin()
             .allowed_origin(&allowed_origin)
             .allowed_methods(vec!["GET", "POST"])
             .allowed_headers([http::header::AUTHORIZATION, http::header::ACCEPT])
@@ -109,6 +133,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .service(register_admin)
             .service(sign_in_admin)
+            .service(validate_admin_token)
     })
     .bind(back::bind_config())?
     .run()
