@@ -7,3 +7,9 @@ pub struct RegisterRequest {
     pub confirmation: String,
     pub admin_code: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct LoginRequest {
+    pub username: String,
+    pub password: String,
+}
