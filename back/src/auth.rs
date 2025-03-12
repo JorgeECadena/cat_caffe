@@ -17,7 +17,7 @@ use chrono::{Utc, Duration};
 pub struct Claims {
     sub: String,
     exp: usize,
-    is_admin: bool,
+    pub is_admin: bool,
 }
 
 pub fn hash(password: &str) -> Result<String, Error> {
