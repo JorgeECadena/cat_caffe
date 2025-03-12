@@ -13,3 +13,8 @@ pub struct LoginRequest {
     pub username: String,
     pub password: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct JWT {
+    pub token: String,
+}
