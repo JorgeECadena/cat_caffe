@@ -55,13 +55,19 @@ async fn sign_in_admin(req: web::Json<admin::LoginRequest>) -> impl Responder {
     let user = db::User {
         username: req.username.clone(),
         password: req.password.clone(),
+        is_admin: true,
         ..Default::default()
     };
 
     match auth::check_password(&user) {
         Ok(_) => {
+            let token = auth::generate_jwt(&user).unwrap_or_else(|err| {
+                eprintln!("Error while generating JWT. Error: {err}");
+                process::exit(1);
+            });
+
             HttpResponse::Ok().json(json!({
-                "message": "Success"
+                "token": token
             }))
         },
         Err(UserLoginError::UserDoesNotExist) => {
