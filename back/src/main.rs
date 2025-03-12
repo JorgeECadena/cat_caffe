@@ -2,7 +2,7 @@ use actix_cors::Cors;
 use actix_web::{post, web, http, App, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use serde_json::json;
-use back::{ self, admin, db::{self, queries}, errors::{UserCreationError, UserLoginError} };
+use back::{ self, admin, auth, db::{self, queries}, errors::{UserCreationError, UserLoginError} };
 use std::{ env, process };
 
 #[post("/admin/register")]
@@ -20,7 +20,7 @@ async fn register_admin(req: web::Json<admin::RegisterRequest>) -> impl Responde
         }));
     }
 
-    let password = back::hash(&req.password).unwrap_or_else(|err| {
+    let password = auth::hash(&req.password).unwrap_or_else(|err| {
         eprintln!("Error while hashing password. Error: {err}");
         process::exit(1);
     });
@@ -58,7 +58,7 @@ async fn sign_in_admin(req: web::Json<admin::LoginRequest>) -> impl Responder {
         ..Default::default()
     };
 
-    match back::check_password(&user) {
+    match auth::check_password(&user) {
         Ok(_) => {
             HttpResponse::Ok().json(json!({
                 "message": "Success"
