@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 async function validateToken(token) {   
     try {
-        const response = await fetch(`${API_URL}/admin/validate`, {
+        const response = await fetch(`${API_URL}/admin/validate-token`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -16,11 +16,10 @@ async function validateToken(token) {
         });
 
         if (!response.ok) {
-            console.log("Response not OK:", response.status, await response.text());
             return false;
         }
 
-        if(response.status === 404) {
+        if(response.status === 403) {
             console.log("User unauthorized: ", await response.json());
             return false;
         }
