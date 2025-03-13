@@ -52,7 +52,6 @@ async fn register_admin(req: web::Json<admin::RegisterRequest>) -> impl Responde
 
 #[post("/admin/login")]
 async fn sign_in_admin(req: web::Json<admin::LoginRequest>) -> impl Responder {
-    eprintln!("Holi");
     let user = db::User {
         username: req.username.clone(),
         password: req.password.clone(),
@@ -92,7 +91,7 @@ async fn sign_in_admin(req: web::Json<admin::LoginRequest>) -> impl Responder {
     }
 }
 
-#[post("/admin/validate")]
+#[post("/admin/validate-token")]
 async fn validate_admin_token(req: web::Json<admin::JWT>) -> impl Responder {
     match auth::validate_jwt(&req.token) {
         Ok(claims) => {
