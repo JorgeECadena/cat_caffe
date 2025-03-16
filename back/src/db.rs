@@ -1,5 +1,6 @@
 use sqlite;
 use dotenv::dotenv;
+use serde::{ Serialize };
 use std::{ env, process };
 
 pub mod tables;
@@ -14,7 +15,7 @@ pub struct User {
     pub is_admin: bool,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize)]
 pub struct Cat {
     pub name: String,
     pub description: String,
