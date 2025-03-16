@@ -1,8 +1,10 @@
 use actix_cors::Cors;
-use actix_web::{post, web, http, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, http, App, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use serde_json::json;
-use back::{ self, admin, auth, db::{self, queries}, errors::{UserCreationError, UserLoginError, CatCreationError} };
+use back::{ self, admin, auth, db::{self, queries}, errors::{
+    UserCreationError, UserLoginError, CatCreationError, CatRetrievalError
+} };
 use std::{ env, process };
 
 #[post("/admin/register")]
@@ -140,6 +142,21 @@ async fn create_cat(req: web::Json<admin::CatCreation>) -> impl Responder {
     }
 }
 
+#[get("/admin/cat/list")]
+async fn get_cats() -> impl Responder {
+    match queries::get_all_cats() {
+        Ok(cats) => {
+            HttpResponse::Ok().json(cats)
+        },
+        Err(CatRetrievalError::DbError(err)) => {
+            eprintln!("Error: {err}");
+            HttpResponse::InternalServerError().json(json!({
+                "error": "Could not retrieve cats"
+            }))
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -161,6 +178,7 @@ async fn main() -> std::io::Result<()> {
             .service(sign_in_admin)
             .service(validate_admin_token)
             .service(create_cat)
+            .service(get_cats)
     })
     .bind(back::bind_config())?
     .run()
