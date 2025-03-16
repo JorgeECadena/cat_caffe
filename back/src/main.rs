@@ -89,9 +89,45 @@ async fn register_admin(req: web::Json<admin::RegisterRequest>) -> impl Responde
     }
 }
 
-#[poast("/login")]
-async fn sign_in() -> Responder {
+#[post("/login")]
+async fn sign_in(req: web::Json<admin::LoginRequest>) -> impl Responder {
+    let user = db::User {
+        username: req.username.clone(),
+        password: req.password.clone(),
+        is_admin: true,
+        ..Default::default()
+    };
 
+    match auth::check_password(&user) {
+        Ok(_) => {
+            let token = auth::generate_jwt(&user).unwrap_or_else(|err| {
+                eprintln!("Error while generating JWT. Error: {err}");
+                process::exit(1);
+            });
+
+            HttpResponse::Ok().json(json!({
+                "token": token
+            }))
+        },
+        Err(UserLoginError::UserDoesNotExist) => {
+            HttpResponse::NotFound().json(json!({
+                "error": "El usuario no existe"
+            }))
+        },
+        Err(UserLoginError::InvalidPassword) => {
+            HttpResponse::Forbidden().json(json!({
+                "error": "Password invalido"
+            }))
+        },
+        Err(UserLoginError::DbError(err)) => {
+            eprintln!("Database error: {err}");
+            process::exit(1);
+        },
+        Err(UserLoginError::UnknownError) => {
+            eprintln!("Unknown error.");
+            process::exit(1);
+        }
+    }
 }
 
 #[post("/admin/login")]
@@ -254,6 +290,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(cors)
             .service(register_admin)
             .service(register)
+            .service(sign_in)
             .service(sign_in_admin)
             .service(validate_admin_token)
             .service(create_cat)
