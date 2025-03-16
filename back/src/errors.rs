@@ -13,3 +13,9 @@ pub enum UserLoginError {
     UnknownError,
     DbError(sqlite::Error),
 }
+
+#[derive(Debug)]
+pub enum CatCreationError {
+    InvalidImage,
+    DbError(sqlite::Error),
+}
