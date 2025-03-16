@@ -66,9 +66,6 @@ function CatForm() {
             }
 
             const json = await response.json();
-
-            console.log(json);
-            
         } catch (e) {
             setError(`Unexpected error: ${e}`);
         }
