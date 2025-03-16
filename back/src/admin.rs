@@ -18,3 +18,10 @@ pub struct LoginRequest {
 pub struct JWT {
     pub token: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct CatCreation {
+    pub name: String,
+    pub description: String,
+    pub image: String,
+}
