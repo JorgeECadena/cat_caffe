@@ -24,3 +24,13 @@ pub enum CatCreationError {
 pub enum CatRetrievalError {
     DbError(sqlite::Error),
 }
+
+#[derive(Debug)]
+pub enum DishCreationError {
+    DbError(sqlite::Error),
+}
+
+#[derive(Debug)]
+pub enum DishRetrievalError {
+    DbError(sqlite::Error),
+}
