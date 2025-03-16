@@ -3,7 +3,12 @@ use actix_web::{get, post, web, http, App, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use serde_json::json;
 use back::{ self, admin, auth, db::{self, queries}, errors::{
-    UserCreationError, UserLoginError, CatCreationError, CatRetrievalError
+    UserCreationError, 
+    UserLoginError, 
+    CatCreationError, 
+    CatRetrievalError, 
+    DishCreationError,
+    DishRetrievalError
 } };
 use std::{ env, process };
 
@@ -142,6 +147,27 @@ async fn create_cat(req: web::Json<admin::CatCreation>) -> impl Responder {
     }
 }
 
+#[post("/admin/menu/add")]
+async fn add_food(req: web::Json<admin::DishCreation>) -> impl Responder {
+    let dish = db::Dish {
+        name: req.name.clone(),
+        price: req.price.clone(),
+    };
+
+    match queries::add_dish(&dish) {
+        Ok(_) => {
+            HttpResponse::Ok().json(json!({
+                "message": "Platillo agregado con exito"
+            }))
+        },
+        Err(DishCreationError::DbError(_)) => {
+            HttpResponse::InternalServerError().json(json!({
+                "error": "Algo salio mal al guardar el platillo"
+            }))
+        }
+    }
+}
+
 #[get("/admin/cat/list")]
 async fn get_cats() -> impl Responder {
     match queries::get_all_cats() {
@@ -151,7 +177,22 @@ async fn get_cats() -> impl Responder {
         Err(CatRetrievalError::DbError(err)) => {
             eprintln!("Error: {err}");
             HttpResponse::InternalServerError().json(json!({
-                "error": "Could not retrieve cats"
+                "error": "No se pudieron obtener los gatos"
+            }))
+        }
+    }
+}
+
+#[get("/admin/menu/list")]
+async fn get_menu() -> impl Responder {
+    match queries::get_all_menu() {
+        Ok(dishes) => {
+            HttpResponse::Ok().json(dishes)
+        },
+        Err(DishRetrievalError::DbError(err)) => {
+            eprintln!("Error: {err}");
+            HttpResponse::InternalServerError().json(json!({
+                "error": "No se pudo obtener el menu"
             }))
         }
     }
@@ -178,7 +219,9 @@ async fn main() -> std::io::Result<()> {
             .service(sign_in_admin)
             .service(validate_admin_token)
             .service(create_cat)
+            .service(add_food)
             .service(get_cats)
+            .service(get_menu)
     })
     .bind(back::bind_config())?
     .run()
