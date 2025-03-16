@@ -14,6 +14,13 @@ pub struct User {
     pub is_admin: bool,
 }
 
+#[derive(Debug, Default)]
+pub struct Cat {
+    pub name: String,
+    pub description: String,
+    pub image: String,
+}
+
 pub fn open_connection() -> sqlite::Connection {
     dotenv().ok();
 

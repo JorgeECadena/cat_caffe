@@ -13,6 +13,9 @@ futures = "0.3"
 sqlite = "0.36.2"
 dotenv = "0.15.0"
 argon2 = "0.5.3"
+jsonwebtoken = "9.2"
+chrono = "0.4.40"
+base64 = "0.21"
 
 [[bin]]
 name = "setup_db"

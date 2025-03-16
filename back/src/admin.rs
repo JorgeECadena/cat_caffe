@@ -7,3 +7,21 @@ pub struct RegisterRequest {
     pub confirmation: String,
     pub admin_code: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct LoginRequest {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct JWT {
+    pub token: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct CatCreation {
+    pub name: String,
+    pub description: String,
+    pub image: String,
+}

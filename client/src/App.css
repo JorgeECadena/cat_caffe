@@ -57,3 +57,11 @@ body {
 .bg-mustang {
   background-color: #807D7D;
 }
+
+.bg-rein {
+  background-color: #312E2E
+}
+
+.align-left {
+  align-self: self-start;
+}

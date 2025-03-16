@@ -2,7 +2,7 @@ use actix_cors::Cors;
 use actix_web::{post, web, http, App, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use serde_json::json;
-use back::{ self, admin, db::{self, queries}, errors::UserCreationError };
+use back::{ self, admin, auth, db::{self, queries}, errors::{UserCreationError, UserLoginError, CatCreationError} };
 use std::{ env, process };
 
 #[post("/admin/register")]
@@ -20,7 +20,7 @@ async fn register_admin(req: web::Json<admin::RegisterRequest>) -> impl Responde
         }));
     }
 
-    let password = back::hash(&req.password).unwrap_or_else(|err| {
+    let password = auth::hash(&req.password).unwrap_or_else(|err| {
         eprintln!("Error while hashing password. Error: {err}");
         process::exit(1);
     });
@@ -50,6 +50,96 @@ async fn register_admin(req: web::Json<admin::RegisterRequest>) -> impl Responde
     }
 }
 
+#[post("/admin/login")]
+async fn sign_in_admin(req: web::Json<admin::LoginRequest>) -> impl Responder {
+    let user = db::User {
+        username: req.username.clone(),
+        password: req.password.clone(),
+        is_admin: true,
+        ..Default::default()
+    };
+
+    match auth::check_password(&user) {
+        Ok(_) => {
+            let token = auth::generate_jwt(&user).unwrap_or_else(|err| {
+                eprintln!("Error while generating JWT. Error: {err}");
+                process::exit(1);
+            });
+
+            HttpResponse::Ok().json(json!({
+                "token": token
+            }))
+        },
+        Err(UserLoginError::UserDoesNotExist) => {
+            HttpResponse::NotFound().json(json!({
+                "error": "El usuario no existe"
+            }))
+        },
+        Err(UserLoginError::InvalidPassword) => {
+            HttpResponse::Forbidden().json(json!({
+                "error": "Password invalido"
+            }))
+        },
+        Err(UserLoginError::DbError(err)) => {
+            eprintln!("Database error: {err}");
+            process::exit(1);
+        },
+        Err(UserLoginError::UnknownError) => {
+            eprintln!("Unknown error.");
+            process::exit(1);
+        }
+    }
+}
+
+#[post("/admin/validate-token")]
+async fn validate_admin_token(req: web::Json<admin::JWT>) -> impl Responder {
+    match auth::validate_jwt(&req.token) {
+        Ok(claims) => {
+            if !claims.is_admin {
+                return HttpResponse::Forbidden().json(json!({
+                    "error": "Usuario no autorizado"
+                }));
+            }
+
+            HttpResponse::Ok().json(json!({
+                "message": "success"
+            }))
+        },
+        Err(_) => {
+            HttpResponse::Forbidden().json(json!({
+                "error": "Token invalido, intenta volver a iniciar sesion"
+            }))
+        }
+    }
+}
+
+#[post("/admin/cat/create")]
+async fn create_cat(req: web::Json<admin::CatCreation>) -> impl Responder {
+    let cat = db::Cat {
+        name: req.name.clone(),
+        description: req.description.clone(),
+        image: req.image.clone()
+    };
+
+    match queries::add_cat(&cat) {
+        Ok(_) => {
+            HttpResponse::Ok().json(json!({
+                "message": "Gato registrado correctamente"
+            }))
+        },
+        Err(CatCreationError::InvalidImage) => {
+            HttpResponse::BadRequest().json(json!({
+                "error": "Error al decodificar la imagen"
+            }))
+        },
+        Err(CatCreationError::DbError(_)) => {
+            HttpResponse::InternalServerError().json(json!({
+                "error": "Algo salio mal al guardar el gato"
+            }))
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -59,6 +149,7 @@ async fn main() -> std::io::Result<()> {
             process::exit(1);
         });
         let cors = Cors::default()
+            .allow_any_origin()
             .allowed_origin(&allowed_origin)
             .allowed_methods(vec!["GET", "POST"])
             .allowed_headers([http::header::AUTHORIZATION, http::header::ACCEPT])
@@ -67,6 +158,9 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .service(register_admin)
+            .service(sign_in_admin)
+            .service(validate_admin_token)
+            .service(create_cat)
     })
     .bind(back::bind_config())?
     .run()
