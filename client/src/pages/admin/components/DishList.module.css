@@ -1,0 +1,28 @@
+.dishList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.dishCard {
+    width: 100%;
+    padding: 15px;
+    border-radius: 10px;
+    background: #f5f5f5;
+    text-align: center;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dishName {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.dishPrice {
+    font-size: 1rem;
+    color: #666;
+}
