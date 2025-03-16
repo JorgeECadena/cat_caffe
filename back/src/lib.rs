@@ -1,11 +1,18 @@
 use std::{env, process};
 use dotenv::dotenv;
+use serde::{ Deserialize, Serialize};
 use crate::{db::{queries}};
 
 pub mod db;
 pub mod admin;
 pub mod errors;
 pub mod auth;
+
+#[derive(Deserialize, Serialize)]
+pub struct UserCreationRequest {
+    pub username: String,
+    pub password: String,
+}
 
 pub fn bind_config() -> (String, u16) {
     dotenv().ok();

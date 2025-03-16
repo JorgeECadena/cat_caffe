@@ -5,7 +5,9 @@ use crate::{db, errors::{
     UserCreationError, 
     UserLoginError, 
     CatCreationError,
-    CatRetrievalError
+    CatRetrievalError,
+    DishCreationError,
+    DishRetrievalError
 }};
 
 pub fn create_user(user: &db::User) -> Result<(), UserCreationError> {
@@ -99,6 +101,20 @@ pub fn add_cat(cat: &db::Cat) -> Result<(), CatCreationError> {
     Ok(())
 }
 
+pub fn add_dish(dish: &db::Dish) -> Result<(), DishCreationError> {
+    let connection = db::open_connection();
+
+    let query = "INSERT INTO menu (name, price) VALUES (?, ?)";
+    let mut statement = connection.prepare(query).map_err(DishCreationError::DbError)?;
+
+    statement.bind((1, dish.name.as_str())).map_err(DishCreationError::DbError)?;
+    statement.bind((2, dish.price)).map_err(DishCreationError::DbError)?;
+
+    statement.next().map_err(DishCreationError::DbError)?;
+
+    Ok(())
+}
+
 pub fn get_all_cats() -> Result<Vec<db::Cat>, CatRetrievalError> {
     let connection = db::open_connection();
     let query = "SELECT name, info, image FROM cats";
@@ -121,4 +137,24 @@ pub fn get_all_cats() -> Result<Vec<db::Cat>, CatRetrievalError> {
     }
 
     Ok(cats)
+}
+
+pub fn get_all_menu() -> Result<Vec<db::Dish>, DishRetrievalError> {
+    let connection = db::open_connection();
+    let query = "SELECT name, price FROM menu";
+    let mut statement = connection.prepare(query).map_err(DishRetrievalError::DbError)?;
+
+    let mut dishes = Vec::new();
+
+    while let Ok(sqlite::State::Row) = statement.next() {
+        let name: String = statement.read(0).map_err(DishRetrievalError::DbError)?;
+        let price: f64 = statement.read(1).map_err(DishRetrievalError::DbError)?;
+
+        dishes.push(db::Dish {
+            name,
+            price
+        });
+    }
+
+    Ok(dishes)
 }

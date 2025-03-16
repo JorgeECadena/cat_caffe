@@ -3,6 +3,10 @@ import AdminLogin from "./pages/admin/components/Login";
 import AdminRegister from "./pages/admin/components/Register";
 import AdminHome from "./pages/admin/components/AdminHome";
 import CatForm from "./pages/admin/components/CatForm";
+import MenuForm from "./pages/admin/components/MenuForm";
+import Login from "./pages/components/Login";
+import Register from "./pages/components/Register";
+import Home from "./pages/components/Home";
 import NotFound from "./components/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import './App.css'
@@ -12,6 +16,11 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } />
           <Route path="/admin" element={
             <ProtectedRoute>
               <AdminHome />
@@ -22,6 +31,13 @@ function App() {
               <CatForm />
             </ProtectedRoute>
           } />
+          <Route path="/admin/add-menu" element={
+            <ProtectedRoute>
+              <MenuForm />
+            </ProtectedRoute>
+          } />
+          <Route path="/login" element={<Login />} />
+          <Route path="/create-user" element={<Register />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/create-user" element={<AdminRegister />} />
           <Route path="*" element={<NotFound />} />

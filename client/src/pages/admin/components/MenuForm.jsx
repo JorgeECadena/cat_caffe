@@ -5,41 +5,23 @@ import forms from "./Forms.module.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-function CatForm() {
+function MenuForm() {
     const [error, setError] = useState("");
-    const [formData, setFormData] = useState({"name": "", "description": "", "image": ""});
+    const [formData, setFormData] = useState({"name": "", "price": ""});
 
     const redirect = useNavigate();
 
-    const handleCancel = () => {
-        redirect("/admin");
-    };
-
     const handleChange = (e) => {
+        const { name, value } = e.target;
+
         setFormData({
             ...formData,
-            [e.target.name]: e.target.value
+            [name]: name === "price" ? (value === "" ? "" : parseInt(value, 10)) : value
         });
     };
 
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-
-        if (!file) {
-            setError("Error al subir el archivo, favor de subirlo de nuevo.");
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-
-        reader.onloadend = () => {
-            const base64String = reader.result.split(",")[1];
-            setFormData({
-                ...formData,
-                image: base64String, 
-            });
-        };
+    const handleCancel = () => {
+        redirect("/admin");
     };
 
     const handleSubmit = async (e) => {
@@ -50,15 +32,15 @@ function CatForm() {
         }
 
         try {
-            const response = await fetch(`${API_URL}/admin/cat/create`, {
+            const response = await fetch(`${API_URL}/admin/menu/add`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify(formData),
             });
 
-            if (response.status == 400) {
+            if (response.status === 400) {
                 const errorJson = await response.json();
                 const errorMessage = errorJson.error;
                 setError(errorMessage);
@@ -66,6 +48,8 @@ function CatForm() {
             }
 
             const json = await response.json();
+
+            console.log(json);
         } catch (e) {
             setError(`Unexpected error: ${e}`);
         }
@@ -75,15 +59,15 @@ function CatForm() {
         <>
             <div className={`${generics.pageContainer}`}>
                 <div className={`${generics.container} bg-mountain`}>
-                    <h1 className={`no-margin ta-center`}>Crear gato</h1>
+                    <h1 className={`no-margin ta-center`}>Agregar al menu</h1>
 
                     <form onSubmit={handleSubmit} className={`${forms.form} ta-start`}>
-                        {error && <p className="no-margin ta-center error">{error}</p>}
+                        { error && <p className="no-margin ta-center error">{error}</p>}
                         <div className={`${forms.field}`}>
-                            <p className={`no-margin`}>Nombre del gato:</p>
+                            <p className="no-margin">Nombre del platillo:</p>
                             <input 
                                 type="text" 
-                                placeholder="Nombre del gato"
+                                placeholder="Nombre del platillo"
                                 name="name"
                                 value={formData.name}
                                 onChange={handleChange}
@@ -92,34 +76,26 @@ function CatForm() {
                         </div>
 
                         <div className={`${forms.field}`}>
-                            <p className={`no-margin`}>Descripcion del gato:</p>
+                            <p className="no-margin">Precio del platillo:</p>
                             <input 
-                                type="text" 
-                                placeholder="Descripcion"
-                                name="description"
-                                value={formData.description}
+                                type="number" 
+                                step="1"
+                                min="0"
+                                placeholder="Precio"
+                                name="price"
+                                value={formData.price}
                                 onChange={handleChange}
-                                className={`${forms.input} bg-vanilla`}
+                                className={`${forms.input} bg-vanilla`} 
                             />
                         </div>
-
-                        <div className={`${forms.field}`}>
-                            <p className={`no-margin`}>Imagen del gato:</p>
-                            <input 
-                                type="file" 
-                                name="image"
-                                accept="image/*"
-                                onChange={handleImageChange}
-                            />
-                        </div>  
 
                         <div className={`${forms.buttons}`}>
                             <div className={`${forms.secondaryContainer}`}>
                                 <button type="button" className={`${forms.button} ${forms.secondaryBtn} bg-mustang vanilla fw-bold`} onClick={handleCancel}>Cancelar</button>
                             </div>
-                            <button className={`${forms.button} ${forms.primaryBtn} bg-saddle vanilla fw-bold`} type="submit">Crear gato</button>
-                        </div>
 
+                            <button type="submit" className={`${forms.button} ${forms.primaryBtn} bg-saddle vanilla fw-bold`}>Agregar platillo</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -127,4 +103,4 @@ function CatForm() {
     );
 }
 
-export default CatForm;
+export default MenuForm;

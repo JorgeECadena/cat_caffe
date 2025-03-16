@@ -25,3 +25,9 @@ pub struct CatCreation {
     pub description: String,
     pub image: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct DishCreation {
+    pub name: String,
+    pub price: f64,
+}
