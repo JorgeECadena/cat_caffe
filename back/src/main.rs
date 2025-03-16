@@ -12,6 +12,38 @@ use back::{ self, admin, auth, db::{self, queries}, errors::{
 } };
 use std::{ env, process };
 
+#[post("/register")]
+async fn register(req: web::Json<back::UserCreationRequest>) -> impl Responder {
+    let password = auth::hash(&req.password).unwrap_or_else(|err| {
+        eprintln!("Error while hashing password. Error: {err}");
+        process::exit(1);
+    });
+
+    let user = db::User {
+        username: req.username.clone(),
+        password: password,
+        is_admin: false,
+        ..Default::default()
+    };
+
+    match queries::create_user(&user) {
+        Ok(_) => {
+            HttpResponse::Ok().json(json!({
+                "message": "Usuario registrado correctamente"
+            }))
+        },
+        Err(UserCreationError::UserAlreadyExists) => {
+            HttpResponse::Conflict().json(json!({
+                "error": "El usuario ya existe"
+            }))
+        },
+        Err(UserCreationError::DbError(err)) => {
+            eprintln!("Database error: {err}");
+            process::exit(1);
+        }
+    }
+}
+
 #[post("/admin/register")]
 async fn register_admin(req: web::Json<admin::RegisterRequest>) -> impl Responder {
     dotenv().ok();
@@ -55,6 +87,11 @@ async fn register_admin(req: web::Json<admin::RegisterRequest>) -> impl Responde
             process::exit(1);
         }
     }
+}
+
+#[poast("/login")]
+async fn sign_in() -> Responder {
+
 }
 
 #[post("/admin/login")]
@@ -216,6 +253,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .service(register_admin)
+            .service(register)
             .service(sign_in_admin)
             .service(validate_admin_token)
             .service(create_cat)
