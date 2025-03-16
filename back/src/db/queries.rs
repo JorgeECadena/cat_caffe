@@ -4,7 +4,8 @@ use base64::{engine::general_purpose, Engine as _};
 use crate::{db, errors::{
     UserCreationError, 
     UserLoginError, 
-    CatCreationError
+    CatCreationError,
+    CatRetrievalError
 }};
 
 pub fn create_user(user: &db::User) -> Result<(), UserCreationError> {
@@ -96,4 +97,28 @@ pub fn add_cat(cat: &db::Cat) -> Result<(), CatCreationError> {
     statement.next().map_err(CatCreationError::DbError)?;
 
     Ok(())
+}
+
+pub fn get_all_cats() -> Result<Vec<db::Cat>, CatRetrievalError> {
+    let connection = db::open_connection();
+    let query = "SELECT name, info, image FROM cats";
+    let mut statement = connection.prepare(query).map_err(CatRetrievalError::DbError)?;
+
+    let mut cats = Vec::new();
+
+    while let Ok(sqlite::State::Row) = statement.next() {
+        let name: String = statement.read(0).map_err(CatRetrievalError::DbError)?;
+        let description: String = statement.read(1).map_err(CatRetrievalError::DbError)?;
+        let image_data: Vec<u8> = statement.read(2).map_err(CatRetrievalError::DbError)?;
+
+        let image_base64 = general_purpose::STANDARD.encode(image_data);
+
+        cats.push(db::Cat {
+            name,
+            description,
+            image: image_base64
+        });
+    }
+
+    Ok(cats)
 }

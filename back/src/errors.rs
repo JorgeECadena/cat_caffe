@@ -19,3 +19,8 @@ pub enum CatCreationError {
     InvalidImage,
     DbError(sqlite::Error),
 }
+
+#[derive(Debug)]
+pub enum CatRetrievalError {
+    DbError(sqlite::Error),
+}
