@@ -22,6 +22,12 @@ pub struct Cat {
     pub image: String,
 }
 
+#[derive(Debug, Default, Serialize)]
+pub struct Dish {
+    pub name: String,
+    pub price: f64,
+}
+
 pub fn open_connection() -> sqlite::Connection {
     dotenv().ok();
 
