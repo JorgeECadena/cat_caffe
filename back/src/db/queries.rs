@@ -1,6 +1,11 @@
 use sqlite;
 use std::process;
-use crate::{db, errors::{UserCreationError, UserLoginError}};
+use base64::{engine::general_purpose, Engine as _};
+use crate::{db, errors::{
+    UserCreationError, 
+    UserLoginError, 
+    CatCreationError
+}};
 
 pub fn create_user(user: &db::User) -> Result<(), UserCreationError> {
     let connection = db::open_connection();
@@ -74,4 +79,21 @@ pub fn get_password(username: &str) -> Result<String, UserLoginError> {
     }
 
    Err(UserLoginError::UnknownError)
+}
+
+pub fn add_cat(cat: &db::Cat) -> Result<(), CatCreationError> {
+    let connection = db::open_connection();
+
+    let image_data = general_purpose::STANDARD.decode(&cat.image).map_err(|_| CatCreationError::InvalidImage)?;
+
+    let query = "INSERT INTO cats (name, info, image) VALUES (?, ?, ?)";
+    let mut statement = connection.prepare(query).map_err(CatCreationError::DbError)?;
+
+    statement.bind((1, cat.name.as_str())).map_err(CatCreationError::DbError)?;
+    statement.bind((2, cat.description.as_str())).map_err(CatCreationError::DbError)?;
+    statement.bind((3, image_data.as_slice())).map_err(CatCreationError::DbError)?;
+
+    statement.next().map_err(CatCreationError::DbError)?;
+
+    Ok(())
 }
