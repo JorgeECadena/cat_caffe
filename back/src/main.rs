@@ -2,7 +2,7 @@ use actix_cors::Cors;
 use actix_web::{post, web, http, App, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use serde_json::json;
-use back::{ self, admin, auth, db::{self, queries}, errors::{UserCreationError, UserLoginError} };
+use back::{ self, admin, auth, db::{self, queries}, errors::{UserCreationError, UserLoginError, CatCreationError} };
 use std::{ env, process };
 
 #[post("/admin/register")]
@@ -113,6 +113,33 @@ async fn validate_admin_token(req: web::Json<admin::JWT>) -> impl Responder {
     }
 }
 
+#[post("/admin/cat/create")]
+async fn create_cat(req: web::Json<admin::CatCreation>) -> impl Responder {
+    let cat = db::Cat {
+        name: req.name.clone(),
+        description: req.description.clone(),
+        image: req.image.clone()
+    };
+
+    match queries::add_cat(&cat) {
+        Ok(_) => {
+            HttpResponse::Ok().json(json!({
+                "message": "Gato registrado correctamente"
+            }))
+        },
+        Err(CatCreationError::InvalidImage) => {
+            HttpResponse::BadRequest().json(json!({
+                "error": "Error al decodificar la imagen"
+            }))
+        },
+        Err(CatCreationError::DbError(_)) => {
+            HttpResponse::InternalServerError().json(json!({
+                "error": "Algo salio mal al guardar el gato"
+            }))
+        }
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -133,6 +160,7 @@ async fn main() -> std::io::Result<()> {
             .service(register_admin)
             .service(sign_in_admin)
             .service(validate_admin_token)
+            .service(create_cat)
     })
     .bind(back::bind_config())?
     .run()
